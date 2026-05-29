@@ -9,9 +9,9 @@ import { AUTH_SESSION_CHANGED_EVENT, clearAuthSession, getAuthSession, StoredAut
 type NavItem = {
   href?: string;
   label: string;
-  icon: 'home' | 'wallet' | 'shop' | 'network' | 'profile' | 'admin' | 'users' | 'courier' | 'orders' | 'inventory' | 'settings' | 'logout';
+  icon: 'home' | 'wallet' | 'shop' | 'network' | 'profile' | 'admin' | 'users' | 'courier' | 'orders' | 'inventory' | 'settings';
   match?: string;
-  action?: 'logout';
+  exact?: boolean;
 };
 
 function renderIcon(icon: NavItem['icon'], active: boolean) {
@@ -41,8 +41,6 @@ function renderIcon(icon: NavItem['icon'], active: boolean) {
       return <svg {...common}><path d="M4 8 12 4l8 4-8 4-8-4Z" /><path d="M4 12l8 4 8-4" /><path d="M4 16l8 4 8-4" /></svg>;
     case 'settings':
       return <svg {...common}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h0a1.6 1.6 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.2a1.6 1.6 0 0 0 1 1.5h0a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v0a1.6 1.6 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z" /></svg>;
-    case 'logout':
-      return <svg {...common}><path d="M10 17 15 12l-5-5" /><path d="M15 12H3" /><path d="M14 3h5v18h-5" /></svg>;
     default:
       return null;
   }
@@ -62,7 +60,7 @@ function getNavItems(userId?: string, role?: 'admin' | 'courier' | 'customer'): 
 
   if (role === 'customer') {
     return [
-      { href: dashboardHref, label: 'Inicio', icon: 'home', match: dashboardHref },
+      { href: dashboardHref, label: 'Inicio', icon: 'home', match: dashboardHref, exact: true },
       { href: walletHref, label: 'Wallet', icon: 'wallet', match: walletHref },
       { href: networkHref, label: 'Red', icon: 'network', match: networkHref },
       { href: storeHref, label: 'Tienda', icon: 'shop', match: storeHref },
@@ -72,22 +70,20 @@ function getNavItems(userId?: string, role?: 'admin' | 'courier' | 'customer'): 
 
   if (role === 'admin') {
     return [
-      { href: '/admin', label: 'Inicio', icon: 'admin', match: '/admin' },
+      { href: '/admin', label: 'Inicio', icon: 'admin', match: '/admin', exact: true },
       { href: '/admin/orders', label: 'Pedidos', icon: 'orders', match: '/admin/orders' },
       { href: '/admin/inventory', label: 'Inventario', icon: 'inventory', match: '/admin/inventory' },
       { href: '/admin/withdrawals', label: 'Retiros', icon: 'wallet', match: '/admin/withdrawals' },
       { href: '/admin/config', label: 'Config', icon: 'settings', match: '/admin/config' },
-      { label: 'Salir', icon: 'logout', action: 'logout' },
     ];
   }
 
   if (role === 'courier') {
     return [
-      { href: '/courier', label: 'Ruta', icon: 'courier', match: '/courier' },
+      { href: '/courier', label: 'Ruta', icon: 'courier', match: '/courier', exact: true },
       { href: '/courier/orders', label: 'Asignadas', icon: 'orders', match: '/courier/orders' },
       { href: '/courier/delivered', label: 'Entregadas', icon: 'orders', match: '/courier/delivered' },
       { href: '/courier/profile', label: 'Perfil', icon: 'profile', match: '/courier/profile' },
-      { label: 'Salir', icon: 'logout', action: 'logout' },
     ];
   }
 
@@ -95,7 +91,6 @@ function getNavItems(userId?: string, role?: 'admin' | 'courier' | 'customer'): 
     { href: dashboardHref, label: 'Inicio', icon: 'home', match: '/dashboard/' },
     { href: '/register', label: 'Red', icon: 'network', match: '/register' },
     { href: '/login', label: 'Cuenta', icon: 'profile', match: '/login' },
-    { label: 'Salir', icon: 'logout', action: 'logout' },
   ];
 }
 
@@ -128,9 +123,6 @@ export function AppBottomNav({ userId, role }: AppBottomNavProps) {
     }
 
     return items.filter((item) => {
-      if (item.action === 'logout') {
-        return true;
-      }
       if (item.href === '/admin') {
         return canAccessAdminModule(session?.user.permissions, 'home');
       }
@@ -162,16 +154,11 @@ export function AppBottomNav({ userId, role }: AppBottomNavProps) {
   }
 
   function isItemActive(item: NavItem): boolean {
-    if (item.action === 'logout') {
-      return false;
-    }
-
     if (!item.match) {
       return pathname === item.href;
     }
 
-    // Avoid root admin/courier routes being active on all nested pages.
-    if (item.match === '/admin' || item.match === '/courier') {
+    if (item.exact) {
       return pathname === item.match;
     }
 
@@ -202,22 +189,6 @@ export function AppBottomNav({ userId, role }: AppBottomNavProps) {
               ? 'bg-[linear-gradient(135deg,rgba(31,95,150,0.14),rgba(41,179,148,0.12))] text-[var(--ink)]'
               : 'text-[var(--muted)] hover:bg-[var(--surface-50)]'
           }`;
-
-          if (item.action === 'logout') {
-            return (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => {
-                  clearAuthSession();
-                  window.location.href = '/';
-                }}
-                className={baseClassName}
-              >
-                {content}
-              </button>
-            );
-          }
 
           return item.href ? (
             <Link key={item.href} href={item.href} className={baseClassName}>

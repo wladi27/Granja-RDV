@@ -1,5 +1,6 @@
 import { AdminMenu } from '@/components/admin/admin-menu';
 import { AppBottomNav } from '@/components/layout/app-bottom-nav';
+import { SignOutButton } from '@/components/admin/sign-out-button';
 import { SystemConfigPanel } from '@/components/admin/system-config-panel';
 import Link from 'next/link';
 
@@ -7,9 +8,14 @@ export default function AdminConfigPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:px-6 md:pt-6">
       <section className="app-card p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Panel admin</p>
-        <h1 className="mt-2 text-2xl font-semibold text-[var(--ink)] sm:text-3xl">Configuración</h1>
-        <p className="mt-2 text-sm text-[var(--muted)]">Secciones separadas para admins, repartidores y red.</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Panel admin</p>
+            <h1 className="mt-2 text-2xl font-semibold text-[var(--ink)] sm:text-3xl">Configuración</h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">Secciones separadas para admins, repartidores y red.</p>
+          </div>
+          <SignOutButton />
+        </div>
       </section>
 
       <AdminMenu />
