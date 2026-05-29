@@ -64,6 +64,11 @@ function resolveApiBaseUrl(): string {
 const API_BASE_URL = resolveApiBaseUrl();
 let activeRefreshPromise: Promise<string | null> | null = null;
 
+function withCacheBust(url: string): string {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}_ts=${Date.now()}`;
+}
+
 function extractAuthorizationHeader(headers?: HeadersInit): string | null {
   if (!headers) {
     return null;
@@ -695,7 +700,7 @@ export async function deleteInventoryProduct(productId: string) {
 
 export async function getSystemConfig(): Promise<SystemConfig> {
   const token = getAccessToken();
-  const response = await apiFetch(`${API_BASE_URL}/config`, {
+  const response = await apiFetch(withCacheBust(`${API_BASE_URL}/config`), {
     cache: 'no-store',
     headers: token
       ? {
@@ -725,7 +730,7 @@ export async function updateSystemConfig(patch: Partial<SystemConfig>) {
 
 export async function getPaymentSettings(): Promise<{ enabledPaymentMethods: PaymentMethod[]; paymentAccounts: PaymentAccountConfig[]; deliveryFeesByMunicipality: DeliveryFeesByMunicipality }> {
   const token = getAccessToken();
-  const response = await apiFetch(`${API_BASE_URL}/config/payment-settings`, {
+  const response = await apiFetch(withCacheBust(`${API_BASE_URL}/config/payment-settings`), {
     cache: 'no-store',
     headers: token
       ? {
@@ -861,7 +866,7 @@ export async function updateCourierUser(
 
 export async function getWithdrawalRules(): Promise<WithdrawalRules> {
   const token = getAccessToken();
-  const response = await apiFetch(`${API_BASE_URL}/config/withdrawal-rules`, {
+  const response = await apiFetch(withCacheBust(`${API_BASE_URL}/config/withdrawal-rules`), {
     cache: 'no-store',
     headers: token
       ? {

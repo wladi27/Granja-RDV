@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
 
 function escapeRegex(value: string): string {
@@ -36,6 +37,13 @@ async function bootstrap() {
   app.enableCors({
     origin: buildCorsOrigin(corsOrigin),
     credentials: true,
+  });
+
+  app.use((_request: Request, response: Response, next: NextFunction) => {
+    response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.setHeader('Pragma', 'no-cache');
+    response.setHeader('Expires', '0');
+    next();
   });
 
   await app.listen(configService.getOrThrow<number>('PORT'));
