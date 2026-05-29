@@ -227,15 +227,6 @@ export function SystemConfigPanel() {
       return;
     }
 
-    const nonWalletMethods = enabledPaymentMethods.filter((method) => method === 'bank_transfer' || method === 'mobile_payment');
-    if (
-      nonWalletMethods.length > 0 &&
-      nonWalletMethods.some((method) => !normalizedPaymentAccounts.some((account) => account.method === method))
-    ) {
-      setMessage('Configura al menos una cuenta para cada metodo activo distinto de wallet');
-      return;
-    }
-
     setSaving(true);
     try {
       const updated = await updateSystemConfig({
