@@ -12,6 +12,9 @@ export function RegisterForm() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [sponsorCode, setSponsorCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +32,10 @@ export function RegisterForm() {
 
       if (!/^[a-z0-9._-]{3,30}$/.test(trimmedUsername)) {
         throw new Error('El username debe tener 3-30 caracteres y usar solo letras, números, punto, guion o guion bajo.');
+      }
+
+      if (password !== confirmPassword) {
+        throw new Error('La confirmación de contraseña no coincide.');
       }
 
       const response = await register({
@@ -123,16 +130,78 @@ export function RegisterForm() {
         <label className="mb-2 block text-sm font-medium text-[var(--ink)]" htmlFor="password">
           Contraseña
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="app-input"
-          placeholder="Mínimo 8 caracteres"
-          autoComplete="new-password"
-          required
-        />
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="app-input pr-12"
+            placeholder="Mínimo 8 caracteres"
+            autoComplete="new-password"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((value) => !value)}
+            className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--accent)] transition hover:bg-slate-100"
+            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          >
+            {showPassword ? (
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3l18 18" />
+                <path d="M10.58 10.58a2 2 0 102.83 2.83" />
+                <path d="M16.68 16.67A10.94 10.94 0 0112 18c-7 0-10-6-10-6a18.7 18.7 0 014.19-5.23" />
+                <path d="M9.88 4.24A10.94 10.94 0 0112 4c7 0 10 6 10 6a18.67 18.67 0 01-3.05 4.28" />
+              </svg>
+            ) : (
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-[var(--ink)]" htmlFor="confirmPassword">
+          Confirmar contraseña
+        </label>
+        <div className="relative">
+          <input
+            id="confirmPassword"
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            className="app-input pr-12"
+            placeholder="Repite tu contraseña"
+            autoComplete="new-password"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword((value) => !value)}
+            className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--accent)] transition hover:bg-slate-100"
+            aria-label={showConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'}
+            title={showConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'}
+          >
+            {showConfirmPassword ? (
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3l18 18" />
+                <path d="M10.58 10.58a2 2 0 102.83 2.83" />
+                <path d="M16.68 16.67A10.94 10.94 0 0112 18c-7 0-10-6-10-6a18.7 18.7 0 014.19-5.23" />
+                <path d="M9.88 4.24A10.94 10.94 0 0112 4c7 0 10 6 10 6a18.67 18.67 0 01-3.05 4.28" />
+              </svg>
+            ) : (
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       <div>

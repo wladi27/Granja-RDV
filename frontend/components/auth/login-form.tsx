@@ -79,7 +79,7 @@ export function LoginForm() {
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="app-input pr-24"
+            className="app-input pr-12"
             placeholder="Tu contraseña"
             autoComplete="current-password"
             required
@@ -87,10 +87,23 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((current) => !current)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ink)]"
+            className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--accent)] transition hover:bg-slate-100"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           >
-            {showPassword ? 'Ocultar' : 'Mostrar'}
+            {showPassword ? (
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3l18 18" />
+                <path d="M10.58 10.58a2 2 0 102.83 2.83" />
+                <path d="M16.68 16.67A10.94 10.94 0 0112 18c-7 0-10-6-10-6a18.7 18.7 0 014.19-5.23" />
+                <path d="M9.88 4.24A10.94 10.94 0 0112 4c7 0 10 6 10 6a18.67 18.67 0 01-3.05 4.28" />
+              </svg>
+            ) : (
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
