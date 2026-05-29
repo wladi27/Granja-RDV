@@ -1,0 +1,49 @@
+RESUMEN DEL SISTEMA: GRANJA RAÍZ DE VIDA
+VISIÓN GENERAL
+Granja Raíz de Vida es un sistema de comercio electrónico con marketing multinivel para la venta de productos cárnicos y lácteos como carnes, huevos, queso y embutidos. El administrador sube los productos, los usuarios compran y pueden referir a otros usuarios para ganar comisiones en Pesos Colombianos.
+
+ACTORES DEL SISTEMA
+El administrador que gestiona productos, órdenes, retiros y configuración. El usuario final que compra productos, refiere personas, gana comisiones y retira su dinero. El repartidor que recibe órdenes asignadas y confirma la entrega con foto o firma.
+
+REGLAS DE NEGOCIO PRINCIPALES
+Registro y Referidos
+El usuario puede registrarse sin necesidad de un código de referido. El código de patrocinador es completamente opcional. Si ingresa sin código, simplemente no tiene un patrocinador asociado y comienza su propio árbol.
+
+Sistema de Comisiones
+Cuando un usuario compra un producto, todos sus patrocinadores activos hasta el nivel N configurable ganan un monto fijo en Pesos Colombianos por cada compra. Los niveles y montos fijos son completamente configurables por el administrador sin necesidad de tocar código. Por ejemplo, el nivel 1 gana 5000 pesos por cada compra de su referido directo, el nivel 2 gana 3000 pesos, y así sucesivamente.
+
+Membresía Mensual Obligatoria
+La primera compra del usuario define su fecha de corte mensual. Si compró por primera vez el día 19 de enero, su ciclo va del 19 de enero al 18 de febrero. Para mantener su membresía activa debe comprar al menos un producto dentro de cada ciclo de 30 días.
+
+Período de Gracia
+Después de su fecha de corte, el usuario tiene 3 días adicionales para realizar una compra y mantener su membresía activa. Durante estos 3 días de gracia, sigue recibiendo comisiones normalmente. Si compra dentro de este período, su membresía se mantiene activa y no hay penalización.
+
+Pérdida de Comisiones por Inactividad
+Si el usuario no compra dentro del ciclo regular más los 3 días de gracia, su membresía se vuelve inactiva. Cuando esto ocurre, pierde permanentemente todas las comisiones que se generaron durante el período de inactividad. No se guardan ni se recuperan al reactivarse. Al volver a comprar, reactiva su membresía pero comienza desde cero sin recibir las comisiones que perdió.
+
+Billetera Virtual
+El usuario tiene una billetera en Pesos Colombianos donde se acumulan las comisiones ganadas por las compras de sus referidos. Puede usar el saldo de su billetera para pagar sus propias compras dentro del sistema. También puede solicitar retirar el saldo a su cuenta bancaria o por Pago Móvil, siempre que cumpla con el monto mínimo que el administrador haya configurado.
+
+Proceso de Compra
+El usuario selecciona productos y los agrega al carrito. Elige el método de pago que puede ser con saldo de billetera, transferencia bancaria, Pago Móvil o efectivo contra entrega. También elige el método de entrega que puede ser retiro en tienda o delivery a domicilio. Si elige delivery debe ingresar su dirección y teléfono de contacto. Una vez creada la orden, el administrador confirma el pago si aplica, luego confirma la orden y si es delivery asigna un repartidor. El repartidor marca los estados de recogido, en camino y entregado. Al finalizar la entrega se procesan las comisiones solo para los patrocinadores que estaban activos en ese momento.
+
+Sistema de Delivery
+El repartidor tiene una app o panel donde ve sus órdenes asignadas. Puede cambiar el estado de la orden a recogido cuando toma el pedido, luego a en camino, y finalmente a entregado. Al marcar como entregado debe subir una foto como evidencia y la firma del cliente.
+
+ARQUITECTURA TECNOLÓGICA
+El backend está desarrollado con NestJS y se comunica con una base de datos PostgreSQL 16 particionada para soportar 5 millones de usuarios. Las comisiones se procesan de forma asíncrona mediante una cola nativa llamada PG Boss que no requiere Redis. El frontend está construido con Next.js 16 para aprovechar el renderizado estático y la red global de distribución de contenido. La caché se maneja en memoria con Node Cache y la comunicación en tiempo real para notificaciones se realiza con WebSockets.
+
+ESCALABILIDAD PARA 5 MILLONES DE USUARIOS
+La tabla de usuarios está particionada en 32 partes según el identificador para distribuir las escrituras. Las tablas de órdenes y comisiones están particionadas por mes para facilitar el mantenimiento y mejorar las consultas. Se utilizan réplicas de lectura para separar el tráfico de consultas pesadas como reportes y árboles de referidos. El backend se escala horizontalmente con múltiples servidores NestJS detrás de un balanceador de carga. El frontend se despliega en Vercel que automáticamente escala con la demanda usando su red global.
+
+CONFIGURACIÓN DINÁMICA SIN CÓDIGO
+El administrador puede modificar en cualquier momento la cantidad de niveles de comisión, el monto fijo en pesos para cada nivel, el monto mínimo para solicitar retiros, el porcentaje de comisión por delivery, y la duración del período de gracia en días. Todos estos cambios se reflejan al instante sin necesidad de reiniciar el servidor ni modificar el código fuente.
+
+DASHBOARDS DEL SISTEMA
+El usuario tiene un dashboard donde ve su saldo, sus referidos directos, un árbol visual de su red hasta el nivel que desee, el historial de comisiones ganadas, el estado de su membresía con los días restantes para comprar incluyendo el período de gracia, su billetera con opción de retirar fondos, el catálogo de productos, el carrito de compras, y el seguimiento de sus órdenes con el estado del delivery.
+
+El administrador tiene un panel para gestionar el inventario de productos, ver todas las órdenes del sistema y actualizar sus estados, gestionar las solicitudes de retiro aprobando o rechazando, asignar repartidores a las órdenes de delivery, configurar los niveles y montos fijos de comisiones, configurar el período de gracia en días, y consultar reportes de usuarios y ventas.
+
+El repartidor tiene un panel donde ve las órdenes que se le han asignado, puede actualizar el estado de cada entrega, y al finalizar debe subir la foto y firma de confirmación.
+
+

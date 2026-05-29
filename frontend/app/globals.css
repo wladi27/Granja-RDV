@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --color-brand-950: #102a43;
+  --color-brand-700: #1f5f96;
+  --color-brand-500: #2f84d6;
+  --color-mint-500: #29b394;
+  --color-ink-900: #102a36;
+  --color-ink-600: #4a6270;
+  --color-surface-50: #f5f8fb;
+  --color-surface-0: #ffffff;
+}
+
+:root {
+  --bg: #edf2f7;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: #ffffff;
+  --ink: #102a36;
+  --muted: #55707e;
+  --accent: #1f5f96;
+  --accent-soft: rgba(47, 132, 214, 0.15);
+  --line: rgba(26, 68, 102, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at -10% -10%, rgba(47, 132, 214, 0.18), transparent 50%),
+    radial-gradient(900px 400px at 110% -10%, rgba(41, 179, 148, 0.14), transparent 45%),
+    var(--bg);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 50%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(47, 132, 214, 0.2);
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.glass-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 36px rgba(16, 42, 67, 0.09);
+  backdrop-filter: blur(10px);
+}
+
+.hero-ring {
+  position: relative;
+}
+
+.hero-ring::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(47, 132, 214, 0.35), rgba(41, 179, 148, 0.2), rgba(255, 255, 255, 0.7));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.app-card {
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  border-radius: 1.35rem;
+  box-shadow: 0 10px 32px rgba(16, 42, 67, 0.08);
+}
+
+.app-input {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0.86rem 0.9rem;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.app-input:focus {
+  border-color: rgba(47, 132, 214, 0.8);
+  box-shadow: 0 0 0 3px rgba(47, 132, 214, 0.16);
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #d9e4ef;
+}
+
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 10%,
+    rgba(255, 255, 255, 0.55) 45%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
