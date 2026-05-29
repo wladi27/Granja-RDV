@@ -153,7 +153,7 @@ function formatPaymentMethodLabel(paymentMethod: PaymentMethod): string {
     case 'cash_on_delivery':
       return 'Efectivo';
     default:
-      return paymentMethod.replaceAll('_', ' ');
+      return 'Metodo de pago';
   }
 }
 
@@ -409,6 +409,22 @@ export function AdminDashboard({ section = 'home' }: AdminDashboardProps) {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const overviewData: AdminOverview = overview ?? {
+    users: 0,
+    orders: 0,
+    pendingDeliveries: 0,
+    totalSalesCop: 0,
+    totalCommissionsCop: 0,
+    totalPaidCop: 0,
+    totalPayableCop: 0,
+    totalExpensesCop: 0,
+    totalApprovedWithdrawalsCop: 0,
+    adminWalletBalanceCop: 0,
+    totalWalletsBalanceCop: 0,
+    monthlyStats: [],
+    adminWalletMovements: [],
+  };
 
   function applySystemConfig(configData: SystemConfig) {
     setSystemConfig(configData);
@@ -1078,44 +1094,44 @@ export function AdminDashboard({ section = 'home' }: AdminDashboardProps) {
           <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Ingresos facturados</p>
-              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overview.totalSalesCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overviewData.totalSalesCop)}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Egresos</p>
-              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overview.totalExpensesCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overviewData.totalExpensesCop)}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Retiros pagados</p>
-              <h3 className="mt-1 text-sm font-semibold text-emerald-700">{formatCop(overview.totalPaidCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-emerald-700">{formatCop(overviewData.totalPaidCop)}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Retiros por pagar</p>
-              <h3 className="mt-1 text-sm font-semibold text-amber-700">{formatCop(overview.totalPayableCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-amber-700">{formatCop(overviewData.totalPayableCop)}</h3>
               <p className="mt-1 text-[10px] text-[var(--muted)]">Solo solicitudes de retiro pendientes.</p>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Utilidad neta</p>
-              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overview.totalSalesCop - overview.totalExpensesCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overviewData.totalSalesCop - overviewData.totalExpensesCop)}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Saldo total billeteras</p>
-              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overview.totalWalletsBalanceCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overviewData.totalWalletsBalanceCop)}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Wallet admin</p>
-              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overview.adminWalletBalanceCop)}</h3>
+              <h3 className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(overviewData.adminWalletBalanceCop)}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Usuarios</p>
-              <h3 className="mt-1 text-xl font-semibold text-[var(--ink)]">{overview.users}</h3>
+              <h3 className="mt-1 text-xl font-semibold text-[var(--ink)]">{overviewData.users}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Órdenes</p>
-              <h3 className="mt-1 text-xl font-semibold text-[var(--ink)]">{overview.orders}</h3>
+              <h3 className="mt-1 text-xl font-semibold text-[var(--ink)]">{overviewData.orders}</h3>
             </article>
             <article className="rounded-2xl bg-[var(--surface-50)] p-3">
               <p className="text-[11px] text-[var(--muted)]">Pendientes</p>
-              <h3 className="mt-1 text-xl font-semibold text-[var(--ink)]">{overview.pendingDeliveries}</h3>
+              <h3 className="mt-1 text-xl font-semibold text-[var(--ink)]">{overviewData.pendingDeliveries}</h3>
             </article>
           </div>
         </div>
@@ -1199,12 +1215,12 @@ export function AdminDashboard({ section = 'home' }: AdminDashboardProps) {
             </div>
             <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface-50)] p-3">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Saldo acumulado</p>
-              <p className="mt-1 text-lg font-semibold text-[var(--ink)]">{formatCop(overview.adminWalletBalanceCop)}</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">Comisiones: {formatCop(overview.totalCommissionsCop)} | Retiros aprobados: {formatCop(overview.totalApprovedWithdrawalsCop)}</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--ink)]">{formatCop(overviewData.adminWalletBalanceCop)}</p>
+              <p className="mt-1 text-xs text-[var(--muted)]">Comisiones: {formatCop(overviewData.totalCommissionsCop)} | Retiros aprobados: {formatCop(overviewData.totalApprovedWithdrawalsCop)}</p>
             </div>
 
             <ul className="mt-3 space-y-2">
-              {overview.adminWalletMovements.length === 0 ? (
+              {overviewData.adminWalletMovements.length === 0 ? (
                 <li className="rounded-xl border border-[var(--line)] bg-[var(--surface-50)] px-3 py-2 text-xs text-[var(--muted)]">No hay movimientos de wallet admin registrados.</li>
               ) : (
                 homeWalletItems.map((movement) => (
@@ -1226,10 +1242,10 @@ export function AdminDashboard({ section = 'home' }: AdminDashboardProps) {
               )}
             </ul>
 
-            {overview.adminWalletMovements.length > 0 ? (
+            {overviewData.adminWalletMovements.length > 0 ? (
               <div className="mt-3 flex items-center justify-between gap-2 border-t border-[var(--line)] pt-3">
                 <p className="text-xs text-[var(--muted)]">
-                  Mostrando {homeWalletPageStart + 1}-{Math.min(homeWalletPageStart + HOME_WALLET_PAGE_SIZE, overview.adminWalletMovements.length)} de {overview.adminWalletMovements.length}
+                  Mostrando {homeWalletPageStart + 1}-{Math.min(homeWalletPageStart + HOME_WALLET_PAGE_SIZE, overviewData.adminWalletMovements.length)} de {overviewData.adminWalletMovements.length}
                 </p>
                 <div className="flex items-center gap-2">
                   <button

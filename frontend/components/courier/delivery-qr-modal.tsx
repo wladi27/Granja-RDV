@@ -40,9 +40,11 @@ export function DeliveryQrModal({ activeQr, onClose }: DeliveryQrModalProps) {
     return null;
   }
 
+  const qr = activeQr;
+
   async function handleCopyConfirmationLink() {
     try {
-      await navigator.clipboard.writeText(activeQr.confirmationUrl);
+      await navigator.clipboard.writeText(qr.confirmationUrl);
       setCopyMessage('Enlace copiado al portapapeles.');
     } catch {
       setCopyMessage('No fue posible copiar automáticamente. Usa el enlace visible para copiarlo manualmente.');
@@ -72,11 +74,11 @@ export function DeliveryQrModal({ activeQr, onClose }: DeliveryQrModalProps) {
             <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
               <div className="rounded-3xl border border-[var(--line)] bg-[linear-gradient(180deg,#f9fcff_0%,#eff6fb_100%)] p-4">
                 <div className="rounded-[24px] border border-white/80 bg-white p-3 shadow-sm">
-                  <img src={activeQr.qrImageUrl} alt="QR de confirmación de entrega" className="mx-auto h-full w-full max-w-[280px] rounded-2xl bg-white object-contain" />
+                  <img src={qr.qrImageUrl} alt="QR de confirmación de entrega" className="mx-auto h-full w-full max-w-[280px] rounded-2xl bg-white object-contain" />
                 </div>
                 <div className="mt-3 rounded-2xl bg-white px-4 py-3 text-center shadow-sm">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Código de entrega</p>
-                  <p className="mt-1 text-2xl font-semibold tracking-[0.18em] text-[var(--ink)]">{activeQr.deliveryCode}</p>
+                  <p className="mt-1 text-2xl font-semibold tracking-[0.18em] text-[var(--ink)]">{qr.deliveryCode}</p>
                 </div>
               </div>
 
@@ -84,19 +86,19 @@ export function DeliveryQrModal({ activeQr, onClose }: DeliveryQrModalProps) {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface-50)] px-4 py-3">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Cliente</p>
-                    <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{activeQr.order.customerName}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{qr.order.customerName}</p>
                   </div>
                   <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface-50)] px-4 py-3">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Vencimiento</p>
-                    <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatDateTime(activeQr.expiresAt)}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatDateTime(qr.expiresAt)}</p>
                   </div>
                   <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface-50)] px-4 py-3 sm:col-span-2">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Dirección</p>
-                    <p className="mt-1 text-sm text-[var(--ink)]">{activeQr.order.address ?? 'Sin dirección registrada'}</p>
+                    <p className="mt-1 text-sm text-[var(--ink)]">{qr.order.address ?? 'Sin dirección registrada'}</p>
                   </div>
                   <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface-50)] px-4 py-3 sm:col-span-2">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Valor del pedido</p>
-                    <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(activeQr.order.totalCop)}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{formatCop(qr.order.totalCop)}</p>
                   </div>
                 </div>
 
@@ -104,7 +106,7 @@ export function DeliveryQrModal({ activeQr, onClose }: DeliveryQrModalProps) {
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Enlace alterno</p>
                   <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Si el cliente no puede escanear, puede abrir este enlace, iniciar sesión con su cuenta y confirmar la recepción.</p>
                   <p className="mt-3 max-h-32 overflow-y-auto break-all rounded-2xl border border-[var(--line)] bg-white px-3 py-2 text-xs text-[var(--ink)]">
-                    {activeQr.confirmationUrl}
+                    {qr.confirmationUrl}
                   </p>
                   <button
                     type="button"

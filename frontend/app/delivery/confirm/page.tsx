@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getAuthSession } from '@/services/auth-session';
 import { confirmDeliveryByToken, getDeliveryConfirmationPreview } from '@/services/api';
@@ -29,7 +29,7 @@ function formatStatus(status: DeliveryConfirmationPreview['status']): string {
   return labels[status] ?? status.replaceAll('_', ' ');
 }
 
-export default function DeliveryConfirmationPage() {
+function DeliveryConfirmationContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [preview, setPreview] = useState<DeliveryConfirmationPreview | null>(null);
@@ -147,5 +147,13 @@ export default function DeliveryConfirmationPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function DeliveryConfirmationPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-xl px-4 pb-16 pt-8 sm:px-6"><p className="text-sm text-[var(--muted)]">Cargando confirmación...</p></main>}>
+      <DeliveryConfirmationContent />
+    </Suspense>
   );
 }
