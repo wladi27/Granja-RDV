@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { register } from '@/services/register';
 import { isUuidV4, setAuthSession } from '@/services/auth-session';
@@ -68,7 +69,7 @@ export function RegisterForm() {
     <form className="app-card space-y-4 p-5 sm:p-6" onSubmit={handleSubmit}>
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Alta de usuario</p>
-        <h2 className="mt-2 text-xl font-semibold text-[var(--ink)]">Crear perfil</h2>
+        <h2 className="mt-2 text-xl font-semibold text-[var(--ink)]">Crear cuenta</h2>
       </div>
       <div>
         <label className="mb-2 block text-sm font-medium text-[var(--ink)]" htmlFor="fullName">
@@ -80,7 +81,9 @@ export function RegisterForm() {
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
           className="app-input"
-          placeholder="Tu nombre"
+          placeholder="Nombre y apellido"
+          autoComplete="name"
+          required
         />
       </div>
 
@@ -94,7 +97,8 @@ export function RegisterForm() {
           value={username}
           onChange={(event) => setUsername(event.target.value.toLowerCase())}
           className="app-input"
-          placeholder="Ej: juanperez"
+          placeholder="usuario"
+          autoComplete="username"
           required
         />
       </div>
@@ -110,12 +114,14 @@ export function RegisterForm() {
           onChange={(event) => setEmail(event.target.value)}
           className="app-input"
           placeholder="correo@ejemplo.com"
+          autoComplete="email"
+          required
         />
       </div>
 
       <div>
         <label className="mb-2 block text-sm font-medium text-[var(--ink)]" htmlFor="password">
-          Password
+          Contraseña
         </label>
         <input
           id="password"
@@ -123,13 +129,15 @@ export function RegisterForm() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           className="app-input"
-          placeholder="Minimo 8 caracteres"
+          placeholder="Mínimo 8 caracteres"
+          autoComplete="new-password"
+          required
         />
       </div>
 
       <div>
         <label className="mb-2 block text-sm font-medium text-[var(--ink)]" htmlFor="sponsorCode">
-          Codigo de patrocinador opcional
+          Código de patrocinador (opcional)
         </label>
         <input
           id="sponsorCode"
@@ -148,11 +156,14 @@ export function RegisterForm() {
         disabled={loading}
         className="w-full rounded-xl bg-[linear-gradient(135deg,#1f5f96,#29b394)] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-sky-900/20 transition hover:translate-y-[-1px] disabled:opacity-60"
       >
-        {loading ? 'Creando cuenta...' : 'Registrarme'}
+        {loading ? 'Creando cuenta...' : 'Crear cuenta'}
       </button>
 
-      <p className="text-xs leading-6 text-[var(--muted)]">
-        Tu código de referido se genera automáticamente al crear tu cuenta.
+      <p className="text-xs text-[var(--muted)]">
+        ¿Ya tienes cuenta?{' '}
+        <Link className="font-semibold text-[var(--accent)]" href="/login">
+          Inicia sesión
+        </Link>
       </p>
     </form>
   );

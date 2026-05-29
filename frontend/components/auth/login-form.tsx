@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { login } from '@/services/auth';
 import { isUuidV4, setAuthSession } from '@/services/auth-session';
@@ -7,8 +8,8 @@ import { normalizeError } from '@/services/error-utils';
 import { getPostLoginRoute } from '@/services/post-login-route';
 
 export function LoginForm() {
-  const [email, setEmail] = useState('admin@grv.local');
-  const [password, setPassword] = useState('Admin12345!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,8 +51,7 @@ export function LoginForm() {
     <form className="app-card space-y-4 p-5 sm:p-6" onSubmit={handleSubmit}>
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Ingreso seguro</p>
-        <h2 className="mt-2 text-xl font-semibold text-[var(--ink)]">Abre tu sesión</h2>
-        <p className="mt-1 text-xs text-[var(--muted)]">Accede con tu correo y contraseña.</p>
+        <h2 className="mt-2 text-xl font-semibold text-[var(--ink)]">Iniciar sesión</h2>
       </div>
       <div>
         <label className="mb-2 block text-sm font-medium text-[var(--ink)]" htmlFor="email">
@@ -63,7 +63,9 @@ export function LoginForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           className="app-input"
-          placeholder="admin@grv.local"
+          placeholder="correo@empresa.com"
+          autoComplete="email"
+          required
         />
       </div>
 
@@ -78,7 +80,9 @@ export function LoginForm() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="app-input pr-24"
-            placeholder="Admin12345!"
+            placeholder="Tu contraseña"
+            autoComplete="current-password"
+            required
           />
           <button
             type="button"
@@ -101,8 +105,11 @@ export function LoginForm() {
         {loading ? 'Ingresando...' : 'Entrar'}
       </button>
 
-      <p className="text-xs leading-6 text-[var(--muted)]">
-        Acceso para administradores, clientes y repartidores con autenticación centralizada.
+      <p className="text-xs text-[var(--muted)]">
+        ¿No tienes cuenta?{' '}
+        <Link className="font-semibold text-[var(--accent)]" href="/register">
+          Regístrate
+        </Link>
       </p>
     </form>
   );

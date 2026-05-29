@@ -6,12 +6,14 @@ export default function RegisterPage() {
       <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr] lg:items-start">
         <div className="app-card p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Registro</p>
-          <h1 className="mt-3 text-2xl font-semibold text-[var(--ink)] sm:text-3xl">Crea tu cuenta comercial</h1>
-          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">Te damos un código de referido automático y puedes vincular patrocinador opcional para entrar en la red.</p>
+          <h1 className="mt-3 font-display text-2xl font-semibold text-[var(--ink)] sm:text-3xl">Abre tu cuenta de trabajo</h1>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            Completa tus datos para empezar a operar con pedidos, pagos y gestión comercial.
+          </p>
 
           <div className="mt-5 rounded-xl border border-[var(--line)] bg-[var(--surface-50)] p-4 text-sm text-[var(--muted)]">
-            <p className="font-semibold text-[var(--ink)]">Requisitos</p>
-            <p className="mt-2">Nombre completo, email válido y contraseña de mínimo 8 caracteres.</p>
+            <p className="font-semibold text-[var(--ink)]">Datos requeridos</p>
+            <p className="mt-2">Nombre, usuario, correo y contraseña segura.</p>
           </div>
         </div>
 
