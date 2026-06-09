@@ -86,6 +86,14 @@ export function toFriendlyErrorMessage(input: string, fallback = 'Ocurrió un er
     return 'No tienes saldo suficiente en tu billetera para este retiro.';
   }
 
+  if (/request entity too large|payload too large|entity too large|413/.test(message)) {
+    return 'El comprobante es demasiado pesado. Usa una foto con menor resolución o intenta con otra imagen.';
+  }
+
+  if (/comprobante es demasiado pesado|comprobante debe ser una imagen/.test(message)) {
+    return input;
+  }
+
   if (message.startsWith('{') && message.endsWith('}')) {
     return fallback;
   }

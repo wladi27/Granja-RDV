@@ -8,7 +8,6 @@ import { DomainService } from '../../common/domain.service';
 import { AdminPermission, SystemConfig } from '../../domain/models';
 
 @Controller('config')
-@UseGuards(JwtAuthGuard)
 export class ConfigController {
   constructor(private readonly domainService: DomainService) {}
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createOrder, getInventoryProductsPage, getPaymentSettings } from '@/services/api';
+import { compressPaymentProofImage } from '@/services/image-compression';
 import { getAuthSession, StoredAuthSession } from '@/services/auth-session';
 import { DeliveryFeesByMunicipality, DeliveryMethod, InventoryProduct, PaymentAccountConfig, PaymentMethod } from '@/types/domain';
 import { AppBottomNav } from '@/components/layout/app-bottom-nav';
@@ -125,20 +126,8 @@ function requiresPaymentAccount(method: PaymentMethod): boolean {
   return normalized === 'bank_transfer' || normalized === 'mobile_payment';
 }
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error('No se pudo leer el archivo del comprobante.'));
-    };
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo del comprobante.'));
-    reader.readAsDataURL(file);
-  });
+async function preparePaymentProof(file: File): Promise<string> {
+  return compressPaymentProofImage(file);
 }
 
 function getProductCategory(productName: string): StoreSection {
@@ -623,13 +612,6 @@ export function StorePage({ dashboardMode = false, dashboardUserId }: StorePageP
   );
 
   useEffect(() => {
-    if (!hasToken) {
-      setEnabledPaymentMethods(['wallet', 'bank_transfer', 'mobile_payment', 'cash']);
-      setPaymentAccounts([]);
-      setDeliveryFeesByMunicipality(DEFAULT_DELIVERY_FEES_BY_MUNICIPALITY);
-      return;
-    }
-
     let mounted = true;
     getPaymentSettings()
       .then((settings) => {
@@ -645,12 +627,16 @@ export function StorePage({ dashboardMode = false, dashboardUserId }: StorePageP
         if (!mounted) {
           return;
         }
+
+        setEnabledPaymentMethods(['wallet', 'bank_transfer', 'mobile_payment', 'cash']);
+        setPaymentAccounts([]);
+        setDeliveryFeesByMunicipality(DEFAULT_DELIVERY_FEES_BY_MUNICIPALITY);
       });
 
     return () => {
       mounted = false;
     };
-  }, [hasToken]);
+  }, []);
 
   useEffect(() => {
     if (!availablePaymentMethods.includes(paymentMethod)) {
@@ -898,20 +884,10 @@ export function StorePage({ dashboardMode = false, dashboardUserId }: StorePageP
                 return;
               }
 
-              if (!file.type.startsWith('image/')) {
-                setCheckoutMessage('El comprobante debe ser una imagen (JPG, PNG o WebP).');
-                return;
-              }
-
-              if (file.size > 4 * 1024 * 1024) {
-                setCheckoutMessage('El comprobante no puede superar 4 MB.');
-                return;
-              }
-
               setCheckoutMessage(null);
               setUploadingPaymentProof(true);
               try {
-                const dataUrl = await fileToDataUrl(file);
+                const dataUrl = await preparePaymentProof(file);
                 setPaymentProofDataUrl(dataUrl);
                 setPaymentProofName(file.name);
               } catch (uploadError) {
@@ -961,20 +937,10 @@ export function StorePage({ dashboardMode = false, dashboardUserId }: StorePageP
                   return;
                 }
 
-                if (!file.type.startsWith('image/')) {
-                  setCheckoutMessage('El comprobante debe ser una imagen (JPG, PNG o WebP).');
-                  return;
-                }
-
-                if (file.size > 4 * 1024 * 1024) {
-                  setCheckoutMessage('El comprobante no puede superar 4 MB.');
-                  return;
-                }
-
                 setCheckoutMessage(null);
                 setUploadingPaymentProof(true);
                 try {
-                  const dataUrl = await fileToDataUrl(file);
+                  const dataUrl = await preparePaymentProof(file);
                   setPaymentProofDataUrl(dataUrl);
                   setPaymentProofName(file.name);
                 } catch (uploadError) {
@@ -1212,7 +1178,7 @@ function CartSidebar({
                     }}
                     className="app-input"
                   />
-                  <p className="mt-2 text-[11px] text-[var(--muted)]">Sube una foto legible de la transferencia o pago movil. Maximo 4 MB.</p>
+                  <p className="mt-2 text-[11px] text-[var(--muted)]">Sube una foto legible de la transferencia o pago movil. Maximo 3 MB; se comprime automaticamente.</p>
                   {uploadingPaymentProof ? <p className="mt-1 text-xs font-medium text-[var(--ink)]">Cargando comprobante...</p> : null}
                   {paymentProofName ? <p className="mt-1 text-xs font-medium text-emerald-700">Archivo: {paymentProofName}</p> : null}
                 </div>

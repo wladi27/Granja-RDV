@@ -1,7 +1,8 @@
 import { AdminPermission, UserRole } from '@/types/domain';
 import { normalizeError, parseBackendErrorMessage, toFriendlyErrorMessage } from '@/services/error-utils';
+import { resolveApiBaseUrl } from '@/services/api-base-url';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002/api';
+const API_BASE_URL = resolveApiBaseUrl();
 
 export interface AuthUser {
   id: string;

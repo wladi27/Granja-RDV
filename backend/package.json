@@ -8,6 +8,7 @@
     "build": "nest build",
     "free-port": "node scripts/free-port.js",
     "seed:test2-network": "node scripts/seed-test2-network.js",
+    "reconcile:commissions": "node scripts/reconcile-commissions.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "npm run free-port && nest start --watch",

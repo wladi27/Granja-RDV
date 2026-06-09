@@ -796,12 +796,13 @@ export class DomainService {
       this.databaseService.query<{
         id: string;
         order_id: string;
+        source_user_id: string;
         level: number;
         amount_cop: number;
         created_at: string;
       }>(
         `
-          SELECT id, order_id, level, amount_cop, created_at
+          SELECT id, order_id, source_user_id, level, amount_cop, created_at
           FROM commissions
           WHERE beneficiary_user_id = $1
           ORDER BY created_at DESC
@@ -838,7 +839,7 @@ export class DomainService {
         id: row.id,
         orderId: row.order_id,
         beneficiaryUserId: userId,
-        sourceUserId: userId,
+        sourceUserId: row.source_user_id,
         level: row.level,
         amountCop: row.amount_cop,
         createdAt: row.created_at,
@@ -946,7 +947,7 @@ export class DomainService {
         throw new BadRequestException('Solo puedes confirmar una orden entregada');
       }
 
-      if (!order.deliveredSignature || !order.deliveredEvidencePhotoUrl) {
+      if (!order.deliveredSignature && !order.deliveredEvidencePhotoUrl) {
         throw new BadRequestException('La orden aún no tiene respaldo de entrega del repartidor');
       }
 
@@ -1357,7 +1358,7 @@ export class DomainService {
           throw new BadRequestException('El comprobante debe ser una imagen válida');
         }
 
-        if (paymentProofDataUrl.length > 6_000_000) {
+        if (paymentProofDataUrl.length > 1_200_000) {
           throw new BadRequestException('El comprobante es demasiado pesado');
         }
       }
@@ -1469,7 +1470,14 @@ export class DomainService {
         client,
       );
 
-      const updatedOrder = await this.findOrderUsingClient(orderId, client);
+      let updatedOrder = await this.findOrderUsingClient(orderId, client);
+
+      if (updatedOrder.deliveryMethod === 'pickup' && updatedOrder.status === 'paid') {
+        await client.query('UPDATE orders SET status = $1 WHERE id = $2', ['confirmed', orderId]);
+        updatedOrder = await this.findOrderUsingClient(orderId, client);
+        await this.processCommissions(updatedOrder, client);
+        return updatedOrder;
+      }
 
       if (updatedOrder.deliveryMethod === 'home_delivery' && updatedOrder.status === 'delivered') {
         await this.processCommissions(updatedOrder, client);
@@ -1681,7 +1689,8 @@ export class DomainService {
               route_position = NULL,
               delivered_signature = COALESCE(delivered_signature, $2),
               delivered_at = COALESCE(delivered_at, NOW()),
-              customer_received_confirmed_at = NOW()
+              customer_received_confirmed_at = NOW(),
+              pending_payment_cop = CASE WHEN payment_method = 'cash' THEN 0 ELSE pending_payment_cop END
           WHERE id = $1
         `,
         [order.id, `Confirmado por QR ${payload.deliveryCode}`],
@@ -2309,39 +2318,52 @@ export class DomainService {
       throw new BadRequestException('amountCop must be a positive integer');
     }
 
-    const config = await this.getConfig();
-    if (input.amountCop < config.minWithdrawalCop) {
-      throw new BadRequestException(`Minimum withdrawal is ${config.minWithdrawalCop}`);
-    }
+    return this.databaseService.withTransaction(async (client) => {
+      const config = await this.getConfigUsingClient(client);
+      if (input.amountCop < config.minWithdrawalCop) {
+        throw new BadRequestException(`Minimum withdrawal is ${config.minWithdrawalCop}`);
+      }
 
-    const user = await this.getUserById(input.userId);
-    if (user.walletBalanceCop < input.amountCop) {
-      throw new BadRequestException('Insufficient wallet balance');
-    }
+      const user = await this.getUserById(input.userId, client, true);
+      const pendingRes = await client.query<{ total: string }>(
+        `
+          SELECT COALESCE(SUM(amount_cop), 0) AS total
+          FROM withdrawals
+          WHERE user_id = $1 AND status = 'pending'
+        `,
+        [input.userId],
+      );
+      const pendingWithdrawalsCop = Number(pendingRes.rows[0]?.total ?? '0');
+      const availableBalanceCop = user.walletBalanceCop - pendingWithdrawalsCop;
 
-    const id = randomUUID();
-    await this.databaseService.query(
-      `
-        INSERT INTO withdrawals(id, user_id, amount_cop, status, destination, notes)
-        VALUES($1, $2, $3, 'pending', $4, $5)
-      `,
-      [id, input.userId, input.amountCop, input.destination ?? null, input.notes ?? null],
-    );
+      if (input.amountCop > availableBalanceCop) {
+        throw new BadRequestException('Insufficient wallet balance');
+      }
 
-    const created = await this.databaseService.query<{
-      id: string;
-      user_id: string;
-      amount_cop: number;
-      status: WithdrawalStatus;
-      destination: string | null;
-      notes: string | null;
-      created_at: string;
-    }>(
-      'SELECT id, user_id, amount_cop, status, destination, notes, created_at FROM withdrawals WHERE id = $1',
-      [id],
-    );
+      const id = randomUUID();
+      await client.query(
+        `
+          INSERT INTO withdrawals(id, user_id, amount_cop, status, destination, notes)
+          VALUES($1, $2, $3, 'pending', $4, $5)
+        `,
+        [id, input.userId, input.amountCop, input.destination ?? null, input.notes ?? null],
+      );
 
-    return created.rows[0];
+      const created = await client.query<{
+        id: string;
+        user_id: string;
+        amount_cop: number;
+        status: WithdrawalStatus;
+        destination: string | null;
+        notes: string | null;
+        created_at: string;
+      }>(
+        'SELECT id, user_id, amount_cop, status, destination, notes, created_at FROM withdrawals WHERE id = $1',
+        [id],
+      );
+
+      return created.rows[0];
+    });
   }
 
   async getUserWithdrawals(userId: string, limit = 30) {
@@ -2800,6 +2822,11 @@ export class DomainService {
   private async processCommissions(order: Order, client: PoolClient): Promise<void> {
     const buyer = await this.getUserById(order.userId, client);
     const now = new Date();
+    const totalProducts = order.items.reduce((acc, item) => acc + item.quantity, 0);
+    if (totalProducts <= 0) {
+      return;
+    }
+
     let currentReferrerId = buyer.referredByUserId;
     const commissionLevels = await this.getCommissionLevelsUsingClient(client);
 
@@ -2807,14 +2834,20 @@ export class DomainService {
       if (!currentReferrerId) {
         break;
       }
-      if (!levelConfig.enabled) {
-        continue;
-      }
 
       const beneficiary = await this.getUserById(currentReferrerId, client, true);
       currentReferrerId = beneficiary.referredByUserId;
 
+      if (!levelConfig.enabled) {
+        continue;
+      }
+
       if (!this.isMembershipActive(beneficiary, now)) {
+        continue;
+      }
+
+      const commissionAmountCop = levelConfig.amountCop * totalProducts;
+      if (commissionAmountCop <= 0) {
         continue;
       }
 
@@ -2824,7 +2857,7 @@ export class DomainService {
         beneficiaryUserId: beneficiary.id,
         sourceUserId: buyer.id,
         level: levelConfig.level,
-        amountCop: levelConfig.amountCop,
+        amountCop: commissionAmountCop,
         createdAt: now.toISOString(),
       };
 

@@ -27,7 +27,7 @@ function buildCorsOrigin(rawOrigins: string) {
       return;
     }
 
-    callback(new Error('Origin not allowed by CORS'));
+    callback(null, false);
   };
 }
 
@@ -37,8 +37,12 @@ async function bootstrapServer(): Promise<express.Express> {
   }
 
   const server = express();
+  server.use(express.json({ limit: '12mb' }));
+  server.use(express.urlencoded({ extended: true, limit: '12mb' }));
+
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
     logger: ['error', 'warn', 'log'],
+    bodyParser: false,
   });
 
   const configService = app.get(ConfigService);

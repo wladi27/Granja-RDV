@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
 
@@ -24,12 +25,16 @@ function buildCorsOrigin(rawOrigins: string) {
       return;
     }
 
-    callback(new Error('Origin not allowed by CORS'));
+    callback(null, false);
   };
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
+  app.useBodyParser('json', { limit: '12mb' });
+  app.useBodyParser('urlencoded', { extended: true, limit: '12mb' });
   const configService = app.get(ConfigService);
   const corsOrigin = configService.getOrThrow<string>('CORS_ORIGIN');
 
