@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { getUserDashboard, updateUserProfile } from '@/services/api';
-import { getAuthSession, setAuthSession } from '@/services/auth-session';
+import { getAuthSession, setAuthSession, clearAuthSession } from '@/services/auth-session';
 import { normalizeError } from '@/services/error-utils';
 import { DashboardUser } from '@/types/domain';
 
@@ -225,6 +225,11 @@ export function CourierProfileSection() {
     }
   }
 
+  function handleSignOut() {
+    clearAuthSession();
+    window.location.replace('/login');
+  }
+
   if (loading) {
     return <p className="text-sm text-[var(--muted)]">Cargando perfil del repartidor...</p>;
   }
@@ -252,6 +257,8 @@ export function CourierProfileSection() {
           </div>
         </div>
       </section>
+
+      
 
       <section className="app-card p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-[var(--ink)]">Datos personales</h2>

@@ -169,7 +169,7 @@ export function AppBottomNav({ userId, role }: AppBottomNavProps) {
     <nav className="fixed inset-x-0 bottom-4 z-50 px-4" suppressHydrationWarning>
       <div
         className="mx-auto grid max-w-2xl gap-2 rounded-[1.6rem] border border-[var(--line)] bg-white/95 p-2 shadow-[0_18px_50px_rgba(16,42,54,0.18)] backdrop-blur-xl"
-        style={{ gridTemplateColumns: `repeat(${visibleItems.length}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${visibleItems.length + (role === 'courier' ? 1 : 0)}, minmax(0, 1fr))` }}
         suppressHydrationWarning
       >
         {visibleItems.map((item) => {
@@ -196,6 +196,25 @@ export function AppBottomNav({ userId, role }: AppBottomNavProps) {
             </Link>
           ) : null;
         })}
+
+        {role === 'courier' ? (
+          <button
+            key="signout"
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                clearAuthSession();
+                window.location.replace('/login');
+              }
+            }}
+            className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-center transition text-[var(--muted)] hover:bg-[var(--surface-50)]`}
+          >
+            <span className={`grid h-8 w-8 place-items-center rounded-full bg-[var(--surface-50)] text-[var(--ink)]`}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">Salir</span>
+          </button>
+        ) : null}
       </div>
     </nav>
   );
